@@ -1,13 +1,15 @@
 """
 Data Cleaner & Report Generator
 --------------------------------
-Toma un CSV/Excel "sucio" (típico export de un sistema de ventas) y entrega:
-  1. Un Excel limpio y formateado, listo para usar.
-  2. Una hoja de "Resumen" con métricas clave (ventas por ciudad, producto top, etc).
-  3. Un log en consola de todo lo que se corrigió, para que el cliente vea el trabajo hecho.
+Takes a "dirty" CSV/Excel file (typical export from a sales system) and
+produces:
+  1. A clean, formatted Excel file, ready to use.
+  2. A "Summary" sheet with key metrics (sales by city, top product, etc).
+  3. A console log of everything that was fixed, so the client can see the
+     work that was done.
 
-Uso:
-    python clean_data.py sample_messy_data.csv reporte_limpio.xlsx
+Usage:
+    python clean_data.py sample_messy_data.csv clean_report.xlsx
 """
 
 import sys
@@ -23,65 +25,66 @@ def load_data(path: str) -> pd.DataFrame:
 
 
 def clean_text_columns(df: pd.DataFrame) -> pd.DataFrame:
-    df["Nombre"] = df["Nombre"].str.strip().str.title()
+    df["Name"] = df["Name"].str.strip().str.title()
     df["Email"] = df["Email"].str.strip().str.lower()
-    df["Ciudad"] = df["Ciudad"].fillna("Desconocido").str.strip().str.title()
-    df["Ciudad"] = df["Ciudad"].replace("", "Desconocido")
-    df["Producto"] = df["Producto"].str.strip().str.title()
+    df["City"] = df["City"].fillna("Unknown").str.strip().str.title()
+    df["City"] = df["City"].replace("", "Unknown")
+    df["Product"] = df["Product"].str.strip().str.title()
     return df
 
 
 def normalize_dates(df: pd.DataFrame) -> pd.DataFrame:
-    # Los datos traen fechas en varios formatos (DD/MM/YYYY, MM/DD/YYYY, YYYY-MM-DD, YYYY.MM.DD).
-    # pandas no puede adivinar el formato correcto para todas a la vez, así que se
-    # intenta cada formato conocido en orden y se completa con lo que sí matchee.
-    formatos = ["%d/%m/%Y", "%m/%d/%Y", "%Y-%m-%d", "%Y.%m.%d", "%d-%m-%Y"]
+    # Dates arrive in several formats (DD/MM/YYYY, MM/DD/YYYY, YYYY-MM-DD,
+    # YYYY.MM.DD). pandas can't guess the right format for all of them at
+    # once, so each known format is tried in order and filled in wherever
+    # it matches.
+    formats = ["%d/%m/%Y", "%m/%d/%Y", "%Y-%m-%d", "%Y.%m.%d", "%d-%m-%Y"]
     parsed = pd.Series(pd.NaT, index=df.index)
-    for fmt in formatos:
+    for fmt in formats:
         mask = parsed.isna()
-        parsed[mask] = pd.to_datetime(df.loc[mask, "Fecha_Compra"], format=fmt, errors="coerce")
-    df["Fecha_Compra"] = parsed
+        parsed[mask] = pd.to_datetime(df.loc[mask, "Purchase_Date"], format=fmt, errors="coerce")
+    df["Purchase_Date"] = parsed
     return df
 
 
 def handle_missing_values(df: pd.DataFrame) -> tuple[pd.DataFrame, dict]:
     stats = {
-        "precios_faltantes": int(df["Precio"].isna().sum()),
-        "ciudades_desconocidas": int((df["Ciudad"] == "Desconocido").sum()),
+        "missing_prices": int(df["Price"].isna().sum()),
+        "unknown_cities": int((df["City"] == "Unknown").sum()),
     }
-    # Precio faltante se rellena con el precio promedio de ese mismo producto
-    df["Precio"] = df.groupby("Producto")["Precio"].transform(lambda s: s.fillna(s.mean()))
+    # Missing price is filled with the average price of that same product
+    df["Price"] = df.groupby("Product")["Price"].transform(lambda s: s.fillna(s.mean()))
     return df, stats
 
 
 def remove_duplicates(df: pd.DataFrame) -> tuple[pd.DataFrame, int]:
-    antes = len(df)
-    df = df.drop_duplicates(subset=["Email", "Fecha_Compra", "Producto"])
-    despues = len(df)
-    return df, antes - despues
+    before = len(df)
+    df = df.drop_duplicates(subset=["Email", "Purchase_Date", "Product"])
+    after = len(df)
+    return df, before - after
 
 
 def build_summary(df: pd.DataFrame) -> pd.DataFrame:
-    df["Total"] = df["Cantidad"] * df["Precio"]
-    resumen_ciudad = df.groupby("Ciudad")["Total"].sum().sort_values(ascending=False)
-    resumen_producto = df.groupby("Producto")["Cantidad"].sum().sort_values(ascending=False)
+    df["Total"] = df["Quantity"] * df["Price"]
+    sales_by_city = df.groupby("City")["Total"].sum().sort_values(ascending=False)
+    units_by_product = df.groupby("Product")["Quantity"].sum().sort_values(ascending=False)
 
-    filas = [
-        ("Ventas totales", f"${df['Total'].sum():,.0f}"),
-        ("Número de transacciones", len(df)),
-        ("Ciudad con más ventas", resumen_ciudad.index[0]),
-        ("Producto más vendido (unidades)", resumen_producto.index[0]),
+    rows = [
+        ("Total sales", f"${df['Total'].sum():,.0f}"),
+        ("Number of transactions", len(df)),
+        ("Top city by sales", sales_by_city.index[0]),
+        ("Best-selling product (units)", units_by_product.index[0]),
         ("", ""),
-        ("Ventas por ciudad", ""),
+        ("Sales by city", ""),
     ]
-    for ciudad, total in resumen_ciudad.items():
-        filas.append((ciudad, f"${total:,.0f}"))
-    filas.append(("", ""))
-    filas.append(("Unidades por producto", ""))
-    for producto, unidades in resumen_producto.items():
-        filas.append((producto, int(unidades)))
+    for city, total in sales_by_city.items():
+        rows.append((city, f"${total:,.0f}"))
+    rows.append(("", ""))
+    rows.append(("Units by product", ""))
+    for product, units in units_by_product.items():
+        rows.append((product, int(units)))
 
-    return pd.DataFrame(filas, columns=["Métrica", "Valor"])
+    return pd.DataFrame(rows, columns=["Metric", "Value"])
 
 
 def style_sheet(ws):
@@ -97,35 +100,35 @@ def style_sheet(ws):
 
 def main():
     if len(sys.argv) != 3:
-        print("Uso: python clean_data.py <archivo_entrada> <archivo_salida.xlsx>")
+        print("Usage: python clean_data.py <input_file> <output_file.xlsx>")
         sys.exit(1)
 
-    entrada, salida = sys.argv[1], sys.argv[2]
+    input_path, output_path = sys.argv[1], sys.argv[2]
 
-    df = load_data(entrada)
-    filas_originales = len(df)
+    df = load_data(input_path)
+    original_rows = len(df)
 
     df = clean_text_columns(df)
     df = normalize_dates(df)
-    df, dup_removidas = remove_duplicates(df)
+    df, duplicates_removed = remove_duplicates(df)
     df, missing_stats = handle_missing_values(df)
-    df = df.sort_values("Fecha_Compra").reset_index(drop=True)
+    df = df.sort_values("Purchase_Date").reset_index(drop=True)
 
-    resumen = build_summary(df)
+    summary = build_summary(df)
 
-    with pd.ExcelWriter(salida, engine="openpyxl") as writer:
-        df.to_excel(writer, sheet_name="Datos Limpios", index=False)
-        resumen.to_excel(writer, sheet_name="Resumen", index=False)
+    with pd.ExcelWriter(output_path, engine="openpyxl") as writer:
+        df.to_excel(writer, sheet_name="Clean Data", index=False)
+        summary.to_excel(writer, sheet_name="Summary", index=False)
         for sheet in writer.sheets.values():
             style_sheet(sheet)
 
-    print("=== Reporte de limpieza ===")
-    print(f"Filas originales:        {filas_originales}")
-    print(f"Duplicados eliminados:   {dup_removidas}")
-    print(f"Precios faltantes rellenados (con promedio del producto): {missing_stats['precios_faltantes']}")
-    print(f"Ciudades desconocidas marcadas: {missing_stats['ciudades_desconocidas']}")
-    print(f"Filas finales:           {len(df)}")
-    print(f"\nArchivo generado: {salida}")
+    print("=== Cleaning Report ===")
+    print(f"Original rows:           {original_rows}")
+    print(f"Duplicates removed:      {duplicates_removed}")
+    print(f"Missing prices filled (with product average): {missing_stats['missing_prices']}")
+    print(f"Unknown cities flagged:  {missing_stats['unknown_cities']}")
+    print(f"Final rows:              {len(df)}")
+    print(f"\nFile generated: {output_path}")
 
 
 if __name__ == "__main__":

@@ -1,13 +1,13 @@
-Nombre,Email,Fecha_Compra,Producto,Cantidad,Precio,Ciudad
-juan perez,JUAN.PEREZ@gmail.com,15/03/2024,Laptop,1,1200,Bogota
-MARIA GOMEZ, maria.gomez@gmail.com ,2024-03-16,Mouse,3,15,Medellin
-Juan Perez,juan.perez@gmail.com,03/15/2024,Laptop,1,1200,Bogota
-carlos ruiz,carlos.ruiz@gmail.com,2024.03.17,Teclado,2,45,
-Ana Torres,ANA.TORRES@gmail.com,18-03-2024,Monitor,1,,Cali
-maria gomez, maria.gomez@gmail.com,16/03/2024,Mouse,3,15,Medellin
-Pedro  Lopez,pedro.lopez@gmail.com,03/19/2024,Laptop,2,1150,Bogota
-LUISA MARTINEZ,luisa.martinez@gmail.com,2024-03-20,Teclado,1,45,Cali
-Carlos Ruiz,carlos.ruiz@gmail.com,17/03/2024,Teclado,2,45,Medellin
-Jorge Diaz,jorge.diaz@gmail.com,21/03/2024,Monitor,2,300,
-Ana Torres,ana.torres@gmail.com,18/03/2024,Monitor,1,280,Cali
-sofia castro,SOFIA.CASTRO@gmail.com,2024-03-22,Mouse,5,15,Bogota
+Name,Email,Purchase_Date,Product,Quantity,Price,City
+john smith,JOHN.SMITH@gmail.com,15/03/2024,Laptop,1,1200,New York
+MARY JONES, mary.jones@gmail.com ,2024-03-16,Mouse,3,15,Chicago
+John Smith,john.smith@gmail.com,03/15/2024,Laptop,1,1200,New York
+carl brown,carl.brown@gmail.com,2024.03.17,Keyboard,2,45,
+Anna White,ANNA.WHITE@gmail.com,18-03-2024,Monitor,1,,Austin
+mary jones, mary.jones@gmail.com,16/03/2024,Mouse,3,15,Chicago
+Peter  Lewis,peter.lewis@gmail.com,03/19/2024,Laptop,2,1150,New York
+LISA MARTIN,lisa.martin@gmail.com,2024-03-20,Keyboard,1,45,Austin
+Carl Brown,carl.brown@gmail.com,17/03/2024,Keyboard,2,45,Chicago
+George Diaz,george.diaz@gmail.com,21/03/2024,Monitor,2,300,
+Anna White,anna.white@gmail.com,18/03/2024,Monitor,1,280,Austin
+sophie clark,SOPHIE.CLARK@gmail.com,2024-03-22,Mouse,5,15,New York
