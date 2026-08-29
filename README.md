@@ -20,6 +20,16 @@ It then generates an Excel file with two sheets:
 2. **Summary** — total sales, top city, best-selling product, and a
    breakdown by city and by product.
 
+## Preview
+
+**Clean Data sheet:**
+
+![Clean data sheet](screenshots/clean_data.png)
+
+**Summary sheet:**
+
+![Summary sheet](screenshots/summary.png)
+
 ## Usage
 
 ```bash
