@@ -51,3 +51,7 @@ column names and the summary's business rules need to change.
 This project was built as a portfolio piece for freelancing (data
 automation / Excel cleaning), using fictional sample data — it does not
 contain real information from any client.
+
+## License
+
+Published for portfolio and educational purposes only — see [LICENSE](LICENSE).
